@@ -1,0 +1,15 @@
+# The store is ~1.4 GB and is bind-mounted at run time, never baked into the image —
+# it holds controlled-access sample-level values (dbGaP phs000720).
+store/
+staging/
+meta_staging/
+data/
+results/
+figures/
+
+.git/
+.Rproj.user/
+.Rhistory
+.RData
+.DS_Store
+docs/

@@ -18,7 +18,8 @@ out <- file.path(cfg$store_dir, "expression")
 dir.create(cfg$store_dir, showWarnings = FALSE, recursive = TRUE)
 unlink(out, recursive = TRUE)
 
-con <- dbConnect(duckdb::duckdb(shared_home = FALSE))
+source(file.path(root, "shiny", "rms_gene_explorer", "R", "store.R"))
+con <- dbConnect(duckdb_driver())
 on.exit(dbDisconnect(con, shutdown = TRUE), add = TRUE)
 
 invisible(dbExecute(con, sprintf("SET memory_limit='%s'", cfg$duckdb_memory_limit)))

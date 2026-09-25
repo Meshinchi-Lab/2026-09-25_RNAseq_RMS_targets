@@ -6,6 +6,20 @@ suppressPackageStartupMessages({
   library(DBI); library(duckdb); library(arrow); library(dplyr)
 })
 
+#' DuckDB driver, tolerant of the version that happens to be installed.
+#'
+#' `shared_home` was added in duckdb 1.5.5 and silences the extension/secret-home notice.
+#' It does not exist in earlier builds — rocker/shiny-verse:4.5.3 ships duckdb 1.5.2, where
+#' passing it fails with "... must be empty". Probe the formals rather than the version
+#' string so this keeps working in both directions.
+duckdb_driver <- function() {
+  if ("shared_home" %in% names(formals(duckdb::duckdb))) {
+    duckdb::duckdb(shared_home = FALSE)
+  } else {
+    duckdb::duckdb()
+  }
+}
+
 #' Open the store. Returns a handle used by query_gene().
 store_open <- function(store_dir, memory_limit = "4GB") {
   gi_f <- file.path(store_dir, "gene_index.parquet")
@@ -23,7 +37,7 @@ store_open <- function(store_dir, memory_limit = "4GB") {
                  store_dir, paste(basename(missing), collapse = ", ")), call. = FALSE)
   }
 
-  con <- dbConnect(duckdb::duckdb(shared_home = FALSE))
+  con <- dbConnect(duckdb_driver())
   dbExecute(con, sprintf("SET memory_limit='%s'", memory_limit))
 
   list(con        = con,

@@ -12,3 +12,6 @@ figures/
 .Ruserdata
 .DS_Store
 rsconnect/
+
+# bslib/sass theme cache, written at app start
+app_cache/

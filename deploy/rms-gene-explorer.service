@@ -1,0 +1,65 @@
+[Unit]
+Description=RMS gene explorer (Shiny) — single-gene expression across RMS cohorts
+Documentation=file:///etc/rms-gene-explorer.env
+# The Docker daemon must be up before the container can start, and must not be torn
+# down before this unit stops.
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+# Crash-loop guard. These MUST live in [Unit] — systemd ignores StartLimit* in [Service]
+# and the protection silently does nothing. More than 5 restarts in 5 minutes and the
+# unit gives up, so the failure shows in `systemctl status` instead of thrashing forever.
+StartLimitBurst=5
+StartLimitIntervalSec=300
+
+[Service]
+# The container runs in the FOREGROUND (no -d), so systemd supervises the real process
+# and Restart= works. With -d, ExecStart would exit immediately and systemd would treat
+# a healthy service as dead and thrash it.
+Type=simple
+
+EnvironmentFile=/etc/rms-gene-explorer.env
+
+# Clear a container left behind by an unclean shutdown (OOM kill, hard reboot). The
+# leading "-" means "ignore failure", which is what makes this safe on first start when
+# there is nothing to remove.
+ExecStartPre=-/usr/bin/docker rm -f %N
+
+# bslib compiles its Bootstrap theme into <appdir>/app_cache at first request. Create it
+# up front so the directory exists no matter who owns the checkout.
+ExecStartPre=-/usr/bin/mkdir -p ${APP_DIR}/shiny/rms_gene_explorer/app_cache
+
+# NOTE: deliberately no "docker pull" here. The image is built locally from the repo
+# Dockerfile and does not exist in any registry, so a pull would fail every start.
+#
+# Mount layout: the code directory is writable (bslib needs app_cache); the store is
+# mounted READ-ONLY because it holds sample-level values from dbGaP phs000720.
+ExecStart=/usr/bin/docker run \
+    --rm \
+    --name %N \
+    --publish ${BIND_ADDR}:${PORT}:3838 \
+    --volume ${APP_DIR}:/app \
+    --volume ${APP_DIR}/store:/app/store:ro \
+    --workdir /app \
+    --memory ${MEM_LIMIT} \
+    --log-driver journald \
+    ${IMAGE} \
+    Rscript -e "shiny::runApp('shiny/rms_gene_explorer', host = '0.0.0.0', port = 3838, launch.browser = FALSE)"
+
+# Give Shiny a moment to close its sockets rather than being killed outright.
+ExecStop=-/usr/bin/docker stop --time 10 %N
+
+Restart=always
+RestartSec=5s
+# Reading samples.parquet and gene_index.parquet from a cold page cache can be slow on a
+# busy filesystem; do not give up early.
+TimeoutStartSec=300
+TimeoutStopSec=30
+
+# No ProtectSystem=/PrivateTmp hardening here on purpose: this unit's job is to talk to
+# /run/docker.sock, and the usual sandboxing directives either block that or provide no
+# real isolation given the daemon already runs as root. Harden the daemon instead.
+
+[Install]
+WantedBy=multi-user.target

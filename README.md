@@ -58,10 +58,9 @@ Three tabs share one gene selection:
    (FP cell line / FN cell line / PDX / control) with fusion status on hover.
 
 DepMap ships values that are already `log2(TPM+1)`. The scale toggle is assay-aware, so
-DepMap is never logged twice and is back-transformed on the linear setting; the axis
-reads `log2(TPM + 1)` or `TPM`, never a nested log.
+DepMap is never logged twice and is back-transformed on the linear setting. 
 
-### Architecture
+### Data Sources
 
 The expression store is narrow long-format Parquet (`gene_symbol`, `dataset`,
 `sample_id`, `value`) hive-partitioned on the first letter of the gene symbol, so a
@@ -70,28 +69,14 @@ lives in a separate ~22k-row table held in memory and joined at query time — n
 repeating group and tissue strings across every row is what keeps the store near 1.5 GB.
 
 `R/plot_gene_distribution.R` is called by both this app and
-`2026-08-25_RMS_multi_cohort_expression_figures.qmd`, so app figures and manuscript
-figures cannot drift apart. `R/rms_palette.R` is vendored verbatim from the upstream
-repo for the same reason.
+`2026-08-25_RMS_multi_cohort_expression_figures.qmd` found at the [companion repository](https://github.com/Meshinchi-Lab/2025-12-04_RNAseq_RMS_infant). 
 
-Adding a dataset (R2 microarray, HPA mass-spec, CCLE RPPA) is one `register_loader()`
-call in `R/loaders.R`; the ETL scripts do not change.
+Adding a dataset (R2 microarray, HPA mass-spec, CCLE RPPA) is supported by `register_loader()` in `R/loaders.R`. 
 
 ### Data governance
 
-PCGP is controlled-access under dbGaP **phs000720** and the OPBG cohort is
-pre-publication. Run only on the analysis host or behind institutional SSO. **Do not
-deploy to shinyapps.io and do not package with shinylive** — shinylive ships the entire
-store into the viewer's browser. `store/`, `staging/`, `meta_staging/`, and `data/` are
-gitignored; no sample-level values belong in this repo.
+PCGP is controlled-access under dbGaP **phs000720** and the OPBG cohort is pre-publication. Run only on the analysis host or behind institutional SSO. **Do not deploy to shinyapps.io and do not package with shinylive** — shinylive ships the entire store into the viewer's browser. `store/`, `staging/`, `meta_staging/`, and `data/` are gitignored; no sample-level values belong in this repo.
 
-An external-facing variant would need a second store holding only per-gene × dataset ×
-group summary statistics, with no sample-level values.
-
-### Documentation
-
-- Design spec: `docs/superpowers/specs/2026-09-25-rms-gene-explorer-design.md`
-- Implementation plan: `docs/superpowers/plans/2026-09-25-rms-gene-explorer.md`
 
 Author: Jenny L. Smith
 ORCID: [0000-0003-0402-2779](https://orcid.org/0000-0003-0402-2779)
