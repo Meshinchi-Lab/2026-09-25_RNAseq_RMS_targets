@@ -1,1 +1,14 @@
 docs/superpowers
+store/
+staging/
+meta_staging/
+data/
+results/
+figures/
+
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+.DS_Store
+rsconnect/

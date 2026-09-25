@@ -1,0 +1,8 @@
+default:
+  source_dir: "~/github_repos/2025-12-04_RNAseq_RMS_infant/results"
+  store_dir: "store"
+  staging_dir: "staging"
+  # Samples per melt block in ETL stage 1. Bounds peak RAM independent of cohort size.
+  block_size: 2000
+  # DuckDB memory ceiling during the out-of-core repartition in stage 2.
+  duckdb_memory_limit: "8GB"
