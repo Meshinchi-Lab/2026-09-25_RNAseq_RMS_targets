@@ -24,18 +24,33 @@ du -sh store                         # ~1.5 GB
 Building the store needs the upstream `source_dir` from `config.yml` to be reachable. If
 it is not, copy `store/` from a machine where it is — the app never reads `source_dir`.
 
-## 2. Build the image
+## 2. Get the image
 
-On amd64 no `--platform` flag is needed (that is only for Apple Silicon):
+Pull the published image:
+
+```bash
+docker pull ghcr.io/meshinchi-lab/rms-gene-explorer:4.5.3
+```
+
+Or build it locally (on amd64 no `--platform` flag is needed — that is only for Apple
+Silicon), and set `IMAGE=rms-gene-explorer:4.5.3` in the env file:
 
 ```bash
 cd ~/github_repos/2026-09-25_RNAseq_RMS_targets
 docker build -t rms-gene-explorer:4.5.3 .
 ```
 
-The image is local-only and not in any registry, which is why the unit has **no
-`docker pull`** step. After changing the Dockerfile, rebuild and
+After changing the Dockerfile, rebuild (or re-pull) and
 `sudo systemctl restart rms-gene-explorer`.
+
+### The image must be run with a command
+
+The image includes
+
+```
+CMD ["Rscript", "-e", "shiny::runApp('shiny/rms_gene_explorer', host = '0.0.0.0', port = 3838, launch.browser = FALSE)"]
+```
+If you see **"Welcome to Shiny Server!"** , either use a tag that includes the `CMD` or append the `Rscript -e ...` command to your `docker run` explicitly
 
 ## 3. Install the unit
 

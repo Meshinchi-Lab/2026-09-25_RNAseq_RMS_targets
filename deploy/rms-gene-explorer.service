@@ -30,8 +30,10 @@ ExecStartPre=-/usr/bin/docker rm -f %N
 # up front so the directory exists no matter who owns the checkout.
 ExecStartPre=-/usr/bin/mkdir -p ${APP_DIR}/shiny/rms_gene_explorer/app_cache
 
-# NOTE: deliberately no "docker pull" here. The image is built locally from the repo
-# Dockerfile and does not exist in any registry, so a pull would fail every start.
+# The image is published to ghcr.io, so refreshing it on start is possible. 
+# Uncomment if you want every restart to track the registry tag, and make sure `docker login ghcr.io` has been done for the user
+# this unit runs as (root, unless you set User=).
+# ExecStartPre=-/usr/bin/docker pull ${IMAGE}
 #
 # Mount layout: the code directory is writable (bslib needs app_cache); the store is
 # mounted READ-ONLY because it holds sample-level values from dbGaP phs000720.
@@ -46,6 +48,9 @@ ExecStart=/usr/bin/docker run \
     --log-driver journald \
     ${IMAGE} \
     Rscript -e "shiny::runApp('shiny/rms_gene_explorer', host = '0.0.0.0', port = 3838, launch.browser = FALSE)"
+# The image now bakes this same command in as its CMD, so the trailing Rscript line is
+# redundant. It is kept explicit so that reading this unit tells you exactly what runs,
+# and so the unit still works against an older image tag that lacks the CMD.
 
 # Give Shiny a moment to close its sockets rather than being killed outright.
 ExecStop=-/usr/bin/docker stop --time 10 %N

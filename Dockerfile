@@ -37,3 +37,19 @@ RUN install2.r --error --skipinstalled --ncpus -1 \
 WORKDIR /app
 
 EXPOSE 3838
+
+# Run the app, NOT Shiny Server.
+#
+# Without this CMD the image inherits `CMD ["/init"]` from rocker/shiny-verse: the s6
+# supervisor starts the shiny-server daemon, which serves /srv/shiny-server (rocker copies
+# the shiny package's example apps there). A bare `docker run <image>` then shows
+# "Welcome to Shiny Server!" and the bind-mounted repo is never read — the app looks
+# broken when in fact it was never asked to start.
+#
+# The app path is RELATIVE so it resolves against whatever working directory the caller
+# sets: `-w /app` with the repo mounted at /app, or `-w "$PWD"` with the repo mounted at
+# its own host path. Both work.
+#
+# host='0.0.0.0' is the container's own interface and is required for the published port
+# to reach it. Access control belongs on the host side of `-p` (127.0.0.1), not here.
+CMD ["Rscript", "-e", "shiny::runApp('shiny/rms_gene_explorer', host = '0.0.0.0', port = 3838, launch.browser = FALSE)"]
