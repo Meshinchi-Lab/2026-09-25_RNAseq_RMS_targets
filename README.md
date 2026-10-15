@@ -1,7 +1,6 @@
 ## Rhabdomyosarcoma Therapeutic Targets — `rms_gene_explorer`
 
-A Shiny app for data mining gene expression from rhabdomyosarcoma tumors and cell lines.
-Select one gene; see its distribution across every cohort assembled for the RMS CAR-T
+A Shiny app for data mining gene expression from rhabdomyosarcoma tumors and cell lines. Select one gene; see its distribution across every cohort assembled for the RMS CAR-T
 target-discovery project.
 
 ### Datasets
@@ -15,8 +14,7 @@ target-discovery project.
 | DepMap Public 26Q1 (14 RMS-FP, 11 RMS-FN, 1,694 other) | 1,719 | log2(TPM+1) |
 | Wachtel 2023 RMS surfaceome | 15 | iTop3 abundance |
 
-Source objects are read in place from `2025-12-04_RNAseq_RMS_infant/results/`; set
-`source_dir` in `config.yml`. Nothing is copied into this repo.
+Source objects are read in place from `2025-12-04_RNAseq_RMS_infant/results/`; set `source_dir` in `config.yml`. Nothing is copied into this repo.
 
 ### Build the store
 

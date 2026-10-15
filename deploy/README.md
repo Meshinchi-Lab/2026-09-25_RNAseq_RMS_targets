@@ -37,7 +37,7 @@ Silicon), and set `IMAGE=rms-gene-explorer:4.5.3` in the env file:
 
 ```bash
 cd ~/github_repos/2026-09-25_RNAseq_RMS_targets
-docker build -t rms-gene-explorer:4.5.3 .
+docker build -t ghcr.io/meshinchi-lab/rms-gene-explorer:4.5.3 .
 ```
 
 After changing the Dockerfile, rebuild (or re-pull) and
