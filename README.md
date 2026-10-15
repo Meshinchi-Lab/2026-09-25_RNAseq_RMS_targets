@@ -32,8 +32,21 @@ Stage 1 accepts dataset names to build incrementally, e.g.
 
 ### Run
 
+Run locally with bare metal installation of R and package dependencies for the app installed. 
+
 ```bash
 Rscript -e 'shiny::runApp("shiny/rms_gene_explorer", port = 8080)'
+```
+
+Or use the docker image once it is built or pulled from the container registry. 
+
+```bash
+docker run --rm \
+    -v "$PWD":"$PWD" \
+    -v "$PWD/store":"$PWD/store":ro \
+    -w "$PWD" \
+    -p 127.0.0.1:3838:3838 \
+    ghcr.io/meshinchi-lab/rms-gene-explorer:4.5.3
 ```
 
 ### Tests
